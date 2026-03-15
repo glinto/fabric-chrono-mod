@@ -41,11 +41,11 @@ data class PlayerTimeData(
     /**
      * Check if the player is eligible for an allotment based on a configurable period.
      *
-     * @param allotmentPeriodSeconds Period length in seconds (defaults to [WEEK_IN_SECONDS])
+     * @param allotmentPeriodLength Period length in seconds (defaults to [WEEK_IN_SECONDS])
      */
-    fun isEligibleForAllotment(allotmentPeriodSeconds: Long = WEEK_IN_SECONDS): Boolean {
+    fun isEligibleForAllotment(allotmentPeriodLength: Long = WEEK_IN_SECONDS): Boolean {
         val timeSinceLastAllotment = Instant.now().epochSecond - lastWeeklyAllotment.epochSecond
-        return timeSinceLastAllotment >= allotmentPeriodSeconds
+        return timeSinceLastAllotment >= allotmentPeriodLength
     }
 
     /**

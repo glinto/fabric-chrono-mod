@@ -44,7 +44,7 @@ class PlayerJoinHandler(
             logger.info("New player ${player.name.string} ($uuid) joined with initial quota")
         } else {
             // Existing player - check for allotment
-            if (playerData.isEligibleForAllotment(config.allotmentPeriodSeconds)) {
+            if (playerData.isEligibleForAllotment(config.allotmentPeriodLength)) {
                 playerData.grantAllotment(config.periodicAllotmentSeconds)
                 player.sendSystemMessage(
                         Component.literal(

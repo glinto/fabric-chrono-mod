@@ -15,7 +15,7 @@ import org.slf4j.Logger
  *   8 hours)
  * @property pvpTransferSeconds Quota transferred from victim to killer on a PvP kill (default: 1
  *   hour)
- * @property allotmentPeriodSeconds How many seconds must pass before the next allotment is granted
+ * @property allotmentPeriodLength How many seconds must pass before the next allotment is granted
  *   (default: 7 days)
  */
 @Serializable
@@ -23,7 +23,7 @@ data class ModConfig(
         val initialQuotaSeconds: Long = 8L * 60 * 60,
         val periodicAllotmentSeconds: Long = 8L * 60 * 60,
         val pvpTransferSeconds: Long = 1L * 60 * 60,
-        val allotmentPeriodSeconds: Long = 7L * 24 * 60 * 60
+        val allotmentPeriodLength: Long = 7L * 24 * 60 * 60
 )
 
 /** Loads and saves [ModConfig] to/from a JSON file, creating defaults when absent. */
@@ -46,7 +46,7 @@ class ModConfigManager(private val configFile: Path, private val logger: Logger)
                         "Loaded config: initialQuotaSeconds=${config.initialQuotaSeconds}, " +
                                 "periodicAllotmentSeconds=${config.periodicAllotmentSeconds}, " +
                                 "pvpTransferSeconds=${config.pvpTransferSeconds}, " +
-                                "allotmentPeriodSeconds=${config.allotmentPeriodSeconds}"
+                                "allotmentPeriodLength=${config.allotmentPeriodLength}"
                 )
             } else {
                 logger.info(
