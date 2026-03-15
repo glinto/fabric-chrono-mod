@@ -43,17 +43,6 @@ src/main/kotlin/com/chronomod/
     └── ScoreboardManager.kt        # Scoreboard UI
 ```
 
-## Architectural Principles
-
-### Separation of Concerns
-The mod follows a clean architecture with distinct layers:
-
-1. **Event Layer** (`events/`) - Thin adapters that translate Minecraft events to domain operations
-2. **Business Logic Layer** (`data/PlayerDataManager`) - Centralizes quota management rules
-3. **Data Layer** (`data/PlayerTimeData`) - Pure data model with minimal logic
-4. **Configuration Layer** (`config/`) - Externalized configuration management
-
-**Key Design Decision**: Event handlers are config-unaware. They delegate to `PlayerDataManager` which encapsulates all business logic and configuration concerns. This ensures:
 
 ## Architectural Principles
 
@@ -65,7 +54,8 @@ The mod follows a clean architecture with distinct layers:
 3. **Data Layer** (`data/PlayerTimeData`) - Pure data model with minimal logic
 4. **Configuration Layer** (`config/`) - Externalized configuration management
 
-**Key Design Decision**: Event handlers are config-unaware. They delegate to `PlayerDataManager` which encapsulates all business logic and configuration concerns. This ensures:
+**Key Design Decision**: Event handlers are config-unaware. They delegate to `PlayerDataManager` which encapsulates all
+business logic and configuration concerns. This ensures:
 - Event handlers focus solely on coordinating Minecraft events
 - Configuration changes don't require modifying event handlers
 - Business logic is testable independently of Minecraft events
@@ -123,7 +113,8 @@ data class PlayerTimeData(
 - `transferQuotaTo(other, amount)` - Transfer quota between players
 - `formatRemainingTime()` - Format as "HH:MM:SS"
 
-**Design Note**: Methods accept config values as parameters rather than using defaults, enforcing that all configuration flows through `PlayerDataManager`.
+**Design Note**: Methods accept config values as parameters rather than using defaults, enforcing that all configuration
+flows through `PlayerDataManager`.
 
 ### 2. PlayerDataManager (Persistence & Business Logic)
 **File**: `src/main/kotlin/com/chronomod/data/PlayerDataManager.kt`
@@ -172,7 +163,8 @@ sealed class PvPTransferResult {
 }
 ```
 
-**Design Note**: By centralizing business logic here, event handlers remain thin and config-unaware. All quota calculation rules are encapsulated in one place.
+**Design Note**: By centralizing business logic here, event handlers remain thin and config-unaware. All quota
+calculation rules are encapsulated in one place.
 
 ### 3. QuotaTracker (Time Burning)
 **File**: `src/main/kotlin/com/chronomod/systems/QuotaTracker.kt`
@@ -199,7 +191,8 @@ sealed class PvPTransferResult {
 **Disconnect Logic**:
 - Save player data on disconnect
 
-**Design Note**: Handler is a thin adapter - it translates Minecraft events to business operations without knowing about configuration values.
+**Design Note**: Handler is a thin adapter - it translates Minecraft events to business operations without knowing about
+configuration values.
 
 ### 5. PvPTransferHandler (Combat Transfers)
 **File**: `src/main/kotlin/com/chronomod/events/PvPTransferHandler.kt`
@@ -217,7 +210,8 @@ sealed class PvPTransferResult {
    - `NoData` → Log warning
 4. All quota calculation done in PlayerDataManager
 
-**Design Note**: Handler focuses on event coordination and player messaging, delegating business logic to the data layer.
+**Design Note**: Handler focuses on event coordination and player messaging, delegating business logic to the data
+layer.
 
 ### 6. ScoreboardManager (Display)
 **File**: `src/main/kotlin/com/chronomod/display/ScoreboardManager.kt`
@@ -248,7 +242,8 @@ sealed class PvPTransferResult {
 - `SERVER_STOPPING` → Save data
 - `END_SERVER_TICK` → Auto-save timer
 
-**Design Note**: Config is loaded first and passed to PlayerDataManager, which then provides all config-aware business logic to the rest of the system.
+**Design Note**: Config is loaded first and passed to PlayerDataManager, which then provides all config-aware business
+logic to the rest of the system.
 
 ## Data Persistence
 

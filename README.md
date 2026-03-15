@@ -120,7 +120,8 @@ src/main/kotlin/com/chronomod/
 
 ## Configuration
 
-The mod's time quota parameters can be configured via `config/chrono-mod/config.json`. The file is automatically created with default values on first run.
+The mod's time quota parameters can be configured via `config/chrono-mod/config.json`. The file is automatically created
+with default values on first run.
 
 ### Configuration File
 Location: `config/chrono-mod/config.json`
