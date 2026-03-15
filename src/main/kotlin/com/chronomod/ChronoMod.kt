@@ -50,8 +50,8 @@ object ChronoMod : DedicatedServerModInitializer {
 
         // Initialize systems
         quotaTracker = QuotaTracker(dataManager, LOGGER)
-        playerJoinHandler = PlayerJoinHandler(dataManager, LOGGER, configManager.config)
-        pvpTransferHandler = PvPTransferHandler(dataManager, LOGGER, configManager.config)
+        playerJoinHandler = PlayerJoinHandler(dataManager, LOGGER)
+        pvpTransferHandler = PvPTransferHandler(dataManager, LOGGER)
         scoreboardManager = ScoreboardManager(dataManager, LOGGER)
 
         // Register server lifecycle events
