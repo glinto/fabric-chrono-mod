@@ -44,7 +44,7 @@ class ChronoCommand(private val dataManager: PlayerDataManager, private val logg
             return 0
         }
 
-        val amountSeconds = minutes * 60
+        val amountSeconds = minutes * 60L
 
         val senderData = dataManager.getOrCreate(sender.uuid)
         val targetData = dataManager.getOrCreate(target.uuid)
