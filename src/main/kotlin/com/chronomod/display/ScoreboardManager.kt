@@ -1,7 +1,6 @@
 package com.chronomod.display
 
 import com.chronomod.data.PlayerDataManager
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.numbers.BlankFormat
@@ -19,18 +18,18 @@ import java.util.concurrent.ConcurrentHashMap
 
 /** Manages the scoreboard display for player time quotas */
 class ScoreboardManager(private val dataManager: PlayerDataManager, private val logger: Logger) {
-    private var tickCounter = 0
     private var objective: Objective? = null
 
-    /** Tracks the last time string sent to each player to avoid redundant packets.
-     *  Entries are added when a score packet is sent and removed when the player
-     *  disconnects (see the DISCONNECT handler registered in [register]).
+    /**
+     * Packet deduplication cache: stores the last HH:MM:SS string sent to each player.
+     * A new score packet is only sent when the formatted time actually changes, preventing
+     * a redundant network packet every second when the value is unchanged (e.g. the player
+     * is paused between seconds).  Entries are cleared when the player disconnects.
      */
-    private val lastDisplayedTime = ConcurrentHashMap<UUID, String>()
+    private val lastSentTime = ConcurrentHashMap<UUID, String>()
 
     companion object {
         private const val OBJECTIVE_NAME = "time_quota"
-        private const val UPDATE_INTERVAL_TICKS = 20 // Update every second
 
         /**
          * Owner name used for the per-player score packet entry.
@@ -50,10 +49,6 @@ class ScoreboardManager(private val dataManager: PlayerDataManager, private val 
 
     /** Register the scoreboard manager */
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register(
-                ServerTickEvents.EndTick { server -> onServerTick(server) }
-        )
-
         // Send per-player display packet when a player joins
         ServerPlayConnectionEvents.JOIN.register(
                 ServerPlayConnectionEvents.Join { handler, _, _ ->
@@ -61,10 +56,10 @@ class ScoreboardManager(private val dataManager: PlayerDataManager, private val 
                 }
         )
 
-        // Clean up tracking when a player disconnects
+        // Clean up deduplication cache when a player disconnects
         ServerPlayConnectionEvents.DISCONNECT.register(
                 ServerPlayConnectionEvents.Disconnect { handler, _ ->
-                    lastDisplayedTime.remove(handler.player.uuid)
+                    lastSentTime.remove(handler.player.uuid)
                 }
         )
 
@@ -106,22 +101,14 @@ class ScoreboardManager(private val dataManager: PlayerDataManager, private val 
         sendPlayerScore(player)
     }
 
-    /** Called on every server tick */
-    private fun onServerTick(server: MinecraftServer) {
-        tickCounter++
-
-        // Update scoreboard every second
-        if (tickCounter >= UPDATE_INTERVAL_TICKS) {
-            tickCounter = 0
-            updateScoreboard(server)
-        }
-    }
-
-    /** Update scoreboard for all online players */
-    private fun updateScoreboard(server: MinecraftServer) {
-        for (player in server.playerList.players) {
-            sendPlayerScore(player)
-        }
+    /**
+     * Update the sidebar display for [player].
+     *
+     * Called by [com.chronomod.systems.QuotaTracker] once per second after each quota burn,
+     * so no independent tick loop is needed here.
+     */
+    fun updatePlayerDisplay(player: ServerPlayer) {
+        sendPlayerScore(player)
     }
 
     /**
@@ -137,9 +124,9 @@ class ScoreboardManager(private val dataManager: PlayerDataManager, private val 
 
         val timeFormatted = playerData.formatRemainingTime()
 
-        // Skip sending a packet if the displayed value has not changed
-        if (lastDisplayedTime[player.uuid] == timeFormatted) return
-        lastDisplayedTime[player.uuid] = timeFormatted
+        // Deduplication: skip sending a packet if the displayed value has not changed
+        if (lastSentTime[player.uuid] == timeFormatted) return
+        lastSentTime[player.uuid] = timeFormatted
 
         player.connection.send(
                 ClientboundSetScorePacket(
@@ -157,8 +144,8 @@ class ScoreboardManager(private val dataManager: PlayerDataManager, private val 
     /** Force-refresh a specific player's scoreboard entry immediately */
     fun updatePlayerScore(server: MinecraftServer, playerUuid: UUID) {
         val player = server.playerList.getPlayer(playerUuid) ?: return
-        // Clear cached value so the next sendPlayerScore call always sends a packet
-        lastDisplayedTime.remove(playerUuid)
+        // Clear deduplication cache so the packet is always sent
+        lastSentTime.remove(playerUuid)
         sendPlayerScore(player)
     }
 }
