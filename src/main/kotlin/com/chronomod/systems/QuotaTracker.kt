@@ -8,7 +8,16 @@ import net.minecraft.server.level.ServerPlayer
 import org.slf4j.Logger
 
 /** Tracks and decrements player time quotas while they are online */
-class QuotaTracker(private val dataManager: PlayerDataManager, private val logger: Logger) {
+class QuotaTracker(
+        private val dataManager: PlayerDataManager,
+        private val logger: Logger,
+        /**
+         * Optional callback invoked after each per-second quota burn, before any kick.
+         * Use this to update dependent systems (e.g. the scoreboard display) in sync
+         * with the burn cycle without requiring those systems to run their own tick loop.
+         */
+        private val onQuotaBurned: ((ServerPlayer) -> Unit)? = null
+) {
     private var tickCounter = 0
 
     /** Register the quota tracker to run every second (20 ticks) */
@@ -49,6 +58,9 @@ class QuotaTracker(private val dataManager: PlayerDataManager, private val logge
 
         // Decrement quota by 1 second
         val stillHasTime = playerData.decrementQuota(1)
+
+        // Notify dependent systems of the burn (e.g. refresh scoreboard display)
+        onQuotaBurned?.invoke(player)
 
         // If quota depleted, kick the player
         if (!stillHasTime) {
