@@ -34,6 +34,7 @@ class ModConfigManager(private val configFile: Path, private val logger: Logger)
     private val json = Json {
         prettyPrint = true
         ignoreUnknownKeys = true
+        encodeDefaults = true
     }
 
     var config: ModConfig = ModConfig()

@@ -55,8 +55,7 @@ object ChronoMod : DedicatedServerModInitializer {
         dataManager = PlayerDataManager(dataFile, LOGGER, configManager.config)
 
         // Initialize systems
-        scoreboardManager = ScoreboardManager(dataManager, LOGGER)
-        quotaTracker = QuotaTracker(dataManager, LOGGER) { player -> scoreboardManager.updatePlayerDisplay(player) }
+        quotaTracker = QuotaTracker(dataManager, LOGGER)
         playerJoinHandler = PlayerJoinHandler(dataManager, LOGGER)
         pvpTransferHandler = PvPTransferHandler(dataManager, LOGGER)
         advancementHandler = AdvancementHandler(dataManager, LOGGER)
@@ -69,7 +68,6 @@ object ChronoMod : DedicatedServerModInitializer {
         quotaTracker.register()
         playerJoinHandler.register()
         pvpTransferHandler.register()
-        scoreboardManager.register()
         chronoCommand.register()
 
         // Register auto-save
@@ -85,11 +83,10 @@ object ChronoMod : DedicatedServerModInitializer {
 
     /** Register server lifecycle events */
     private fun registerLifecycleEvents() {
-        // Server started - load data and initialize scoreboard
+        // Server started - load data
         ServerLifecycleEvents.SERVER_STARTED.register { server ->
             LOGGER.info("Server started - loading player data")
             dataManager.load()
-            scoreboardManager.initialize(server)
         }
 
         // Server stopping - save data
