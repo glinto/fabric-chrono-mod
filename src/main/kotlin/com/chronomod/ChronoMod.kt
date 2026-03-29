@@ -3,7 +3,6 @@ package com.chronomod
 import com.chronomod.commands.ChronoCommand
 import com.chronomod.config.ModConfigManager
 import com.chronomod.data.PlayerDataManager
-import com.chronomod.display.ScoreboardManager
 import com.chronomod.events.AdvancementHandler
 import com.chronomod.events.PlayerJoinHandler
 import com.chronomod.events.PvPTransferHandler
@@ -32,7 +31,6 @@ object ChronoMod : DedicatedServerModInitializer {
     private lateinit var quotaTracker: QuotaTracker
     private lateinit var playerJoinHandler: PlayerJoinHandler
     private lateinit var pvpTransferHandler: PvPTransferHandler
-    private lateinit var scoreboardManager: ScoreboardManager
     private lateinit var advancementHandler: AdvancementHandler
     private lateinit var chronoCommand: ChronoCommand
 
